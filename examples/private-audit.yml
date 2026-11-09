@@ -1,0 +1,37 @@
+# EXAMPLE ONLY: copy into a private repository's .github/workflows/
+# Never enable this in the public source repository.
+name: Private manual GitHub Actions audit
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Create read-only GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.WATCHTOWER_APP_CLIENT_ID }}
+          private-key: ${{ secrets.WATCHTOWER_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          permission-contents: read
+          permission-metadata: read
+
+      - name: Check out private source
+        uses: actions/checkout@v7
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
+
+      - name: Run private audit
+        env:
+          WATCHTOWER_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: python3 -m scripts.audit
+
+      # Report distribution and commits are deliberately disabled.
+      # Add approved private storage if persistent output is required.
