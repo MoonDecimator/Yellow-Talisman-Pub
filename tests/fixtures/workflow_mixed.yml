@@ -1,0 +1,12 @@
+name: Mixed uses references
+jobs:
+  test:
+    steps:
+      - uses: actions/checkout@v4 # unquoted inline comment
+      - uses: "actions/setup-python@v5" # quoted
+      - uses: 'owner/action/path/to/action@v2'
+      - uses: ./local-action
+      - uses: ../shared-action
+      - uses: docker://alpine:latest
+  reusable:
+    uses: owner/repo/.github/workflows/build.yml@main
